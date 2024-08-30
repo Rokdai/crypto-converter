@@ -1,0 +1,21 @@
+.root {
+  height: 20px;
+  width: 100%;
+
+  border-radius: 4px;
+
+  background-color: #c0c0c0;
+  background: linear-gradient(90deg, #c0c0c0 25%, #e0e0e0 50%, #c0c0c0 75%);
+  background-size: 200% 100%;
+
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

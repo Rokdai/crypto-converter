@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+
+  border: none;
+
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+
+  font-size: 16px;
+  line-height: 26px;
+}
+
+main {
+  min-height: 100vh;
+}
+
+a,
+a:hover,
+a:link,
+a:visited {
+  text-decoration: none;
+}
+
+input:focus,
+input:active,
+button:focus,
+button:active {
+  box-shadow: none;
+
+  outline: none;
+}

@@ -1,0 +1,13 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+
+  height: 100%;
+
+  & .respError {
+    color: $error;
+  }
+}
