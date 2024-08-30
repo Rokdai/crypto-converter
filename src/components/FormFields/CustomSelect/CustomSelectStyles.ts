@@ -6,7 +6,7 @@ export const customSelectStyles: StylesConfig<
   false,
   GroupBase<ISelectOption>
 > = {
-  container: (baseStyles, state) => ({
+  container: (baseStyles) => ({
     ...baseStyles,
     maxWidth: 110,
     width: "100%",
