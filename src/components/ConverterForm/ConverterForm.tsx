@@ -2,7 +2,7 @@
 
 import { CustomInput } from "../FormFields/CustomInput";
 import { SingleValue } from "react-select";
-import { ChangeEvent, FC, useEffect, useState } from "react";
+import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
 import { getCurrencyRates } from "@/api";
 import { CustomSelect } from "../FormFields/CustomSelect";
 import { ISelectOption } from "@/types/select";
@@ -10,6 +10,8 @@ import { toast } from "react-toastify";
 
 import styles from "./ConverterForm.module.scss";
 import { Skeleton } from "../Skeleton";
+import { ICurrencyRates } from "@/types/currency";
+import { debounce } from "@/utils";
 
 interface IPrors {
   currencyList?: ISelectOption[];
@@ -44,6 +46,45 @@ export const ConverterForm: FC<IPrors> = ({ currencyList }) => {
     setBaseCurrencyValue(e.target.value);
   };
 
+  const calculateQuotedCurrencyValue = (
+    baseValue: string,
+    rates: ICurrencyRates,
+    quotedCurrency: string
+  ) => {
+    return Number(baseValue) !== 1
+      ? (Number(baseValue) / rates[quotedCurrency]).toFixed(3)
+      : rates[quotedCurrency].toFixed(2);
+  };
+
+  const createQuotedCurrencyValue = async (
+    baseCurrency: string,
+    quotedCurrency: string,
+    baseValue: string
+  ) => {
+    setIsLoading(true);
+
+    try {
+      const res = await getCurrencyRates(baseCurrency);
+
+      setQuotedCurrencyValue(
+        calculateQuotedCurrencyValue(baseValue, res.data.rates, quotedCurrency)
+      );
+    } catch (error) {
+      console.log(`Get data error: ${error}`);
+
+      toast.error(
+        "It was not possible to get an up-to-date course.Please try reloading the page or come back later."
+      );
+    }
+
+    setIsLoading(false);
+  };
+
+  const debouncedCreateQuotedCurrencyValue = useCallback(
+    debounce(createQuotedCurrencyValue, 400),
+    []
+  );
+
   useEffect(() => {
     if (
       baseCurrency &&
@@ -51,31 +92,16 @@ export const ConverterForm: FC<IPrors> = ({ currencyList }) => {
       baseCurrencyValue &&
       /^-?\d+(\.\d+)?$/.test(baseCurrencyValue)
     ) {
-      (async () => {
-        setIsLoading(true);
-
-        try {
-          const res = await getCurrencyRates(baseCurrency.value);
-
-          setQuotedCurrencyValue(
-            Number(baseCurrencyValue) !== 1
-              ? (
-                  Number(baseCurrencyValue) /
-                  res.data.rates[quotedCurrency.value]
-                ).toFixed(3)
-              : res.data.rates[quotedCurrency.value].toFixed(2)
-          );
-        } catch (error) {
-          console.log(`Get data error: ${error}`);
-
-          toast.error(
-            "It was not possible to get an up-to-date course.Please try reloading the page or come back later."
-          );
-        }
-
-        setIsLoading(false);
-      })();
+      debouncedCreateQuotedCurrencyValue(
+        baseCurrency.value,
+        quotedCurrency.value,
+        baseCurrencyValue
+      );
     }
+
+    return () => {
+      debouncedCreateQuotedCurrencyValue.cancel();
+    };
   }, [baseCurrencyValue, baseCurrency, quotedCurrency]);
 
   return (
